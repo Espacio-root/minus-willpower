@@ -1,0 +1,8 @@
+# venv
+\venv
+
+# IDE
+\__pycache__
+
+# etc
+test.py
