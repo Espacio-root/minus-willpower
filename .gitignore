@@ -3,6 +3,7 @@
 
 # IDE
 \__pycache__
+\.vscode
 
 # etc
 test.py
