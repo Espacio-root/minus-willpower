@@ -76,7 +76,7 @@ class MultipleInstances:
     def launch_pythonw(command, *args):
         args = [str(arg) for arg in args]
         args = ' '.join(args)
-        subprocess.Popen(['python', command, args])
+        subprocess.Popen(['pythonw', command, args])
 
     def launch_instances(self, num):
         for _ in range(num):
@@ -92,13 +92,13 @@ class MultipleInstances:
                 if proc.info['name'] == name:
                     count += 1
             return count
-        initial_num_instances = count_pythonw_instances('python.exe')
+        initial_num_instances = count_pythonw_instances('pythonw.exe')
 
         while time() <= self.time_to_unblock:
-            num_instances = count_pythonw_instances('python.exe')
+            num_instances = count_pythonw_instances('pythonw.exe')
             if num_instances < initial_num_instances:
                 self.launch_pythonw(os.path.join(os.path.dirname(__file__), 'multiple.py'))
-                sleep(self.delay)
+                break
                 
     def block_websites(self):
         self.launch_instances(self.num_processes)
