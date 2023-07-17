@@ -4,7 +4,7 @@ import re
 import sys
 import os
 import subprocess
-import psutil #type: ignore
+import psutil
 
 class WebsiteBlocker:
     
@@ -88,7 +88,7 @@ class MultipleInstances:
         def count_pythonw_instances(name):
             count = 0
             for proc in psutil.process_iter(['name']):
-                if proc.info['name'] == name: #type: ignore
+                if proc.info['name'] == name:  # type: ignore
                     count += 1
             return count
         initial_num_instances = count_pythonw_instances('pythonw.exe')
