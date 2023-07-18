@@ -37,7 +37,7 @@ class WebsiteBlocker:
         hosts_content = self.hosts_content
         # pattern = r'^127\.0\.0\.1\s+\S+'
         # matches = re.findall(pattern, content, re.MULTILINE)
-        website_list_content = [f'127.0.0.1 {website}\n' for website in self._initial_website_list]
+        website_list_content = [f'127.0.0.1 {website}\n' for website in self._initial_website_list if website.strip() != '']
         website_list_content = ''.join(website_list_content)
             
         if hosts_content != website_list_content:
