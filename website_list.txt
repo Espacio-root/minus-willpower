@@ -16,3 +16,6 @@ pornhub.org
 reddit.com
 redgif.com
 quora.com
+youtube.com
+www.youtube.com
+m.youtube.com

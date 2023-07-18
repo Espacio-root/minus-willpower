@@ -34,20 +34,16 @@ class WebsiteBlocker:
             raise Exception('OS currently not supported')
 
     def update_host_file(self):
-        with open(self.hosts_path, 'a') as host_file:
-            content = self.hosts_content
-            pattern = r'^127\.0\.0\.1\s+\S+'
-            matches = re.findall(pattern, content, re.MULTILINE)
-            modified_content = ''.join(matches)
-            res = []
+        hosts_content = self.hosts_content
+        # pattern = r'^127\.0\.0\.1\s+\S+'
+        # matches = re.findall(pattern, content, re.MULTILINE)
+        website_list_content = [f'127.0.0.1 {website}\n' for website in self._initial_website_list]
+        website_list_content = ''.join(website_list_content)
             
-            for website in self._initial_website_list:
-                if website in modified_content:
-                    continue
-                res.append(website)
-                host_file.write(f'127.0.0.1 {website}\n')
+        if hosts_content != website_list_content:
+            with open(self.hosts_path, 'w') as host_file:
+                host_file.write(website_list_content)
 
-            return res
 
 class ConstantWebsiteBlocker(WebsiteBlocker):
     def __init__(self, website_list_path, time_to_unblock, delay_between_checks):
@@ -108,6 +104,7 @@ if __name__ == '__main__':
     args = sys.argv[1:]
     args = args[0].split(' ')
 
-    blocker = ConstantWebsiteBlocker(args[0], float(args[1]), int(args[2]))
+    # website_list_path, time_to_unblock, delay_between_checks
+    blocker = ConstantWebsiteBlocker(args[0], float(args[1]), float(args[2]))
     blocker.block_websites()
             
