@@ -11,8 +11,7 @@ if __name__ == '__main__':
     website_list_path = 'website_list.txt'
     delay_between_checks = 2
     arg = sys.argv[1]
-    arg = Helper.handle_time(arg)
-    arg = min(arg, max_time_period)
+    time = min(Helper.handle_time(arg), Helper.handle_time(arg))
     
-    instance = TerminalPreventBlocker(website_list_path, arg, delay_between_checks)
+    instance = TerminalPreventBlocker(website_list_path, time, delay_between_checks)
     [instance.launch_instance() for _ in range(2)]

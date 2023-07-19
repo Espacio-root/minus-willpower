@@ -62,16 +62,17 @@ class TerminalPreventBlocker(ConstantWebsiteBlocker):
     def __init__(self, website_list_path, time_to_unblock, delay_between_checks):
         super().__init__(website_list_path, time_to_unblock, delay_between_checks)
 
-        self.launch_instance = lambda: subprocess.Popen(['pythonw', os.path.join(os.path.dirname(__file__), 'single.py'), str(self.website_list_path), str(self.time_to_unblock), str(self.delay)])
+        self.launch_instance = lambda: subprocess.Popen(['python', os.path.join(os.path.dirname(__file__), 'single.py'), str(self.website_list_path), str(self.time_to_unblock), str(self.delay)])
     
     def track_instances(self):
         def pythonw_instances():
             instances = []
             for proc in psutil.process_iter(['name', 'pid']):
-                if proc.info['name'] == 'pythonw.exe':  # type: ignore
+                if proc.info['name'] == 'python.exe':  # type: ignore
                     instances.append(proc.info['pid']) # type: ignore
             return instances
         prev_instances = pythonw_instances()
+        
         while time() <= self.time_to_unblock:
             cur_instances = pythonw_instances()
             if len(cur_instances) < len(prev_instances):
@@ -87,11 +88,7 @@ class Helper:
     
     @staticmethod
     def handle_time(cur_time: str or int or float) -> float:
-        if isinstance(cur_time, int):
-            return float(cur_time)
-        elif isinstance(cur_time, float):
-            return cur_time
-        elif isinstance(cur_time, str):
+        if isinstance(cur_time, str):
             if ':' not in cur_time:
                 return float(cur_time)
             
@@ -101,7 +98,9 @@ class Helper:
             cur_time = '+'.join(li)
             
 
-            return float(eval(cur_time)) + time()
+            cur_time = eval(cur_time)
+        
+        return float(cur_time) + time()
     
             
 # class MultipleInstances:
