@@ -67,6 +67,22 @@ class TerminalPreventBlocker(ConstantWebsiteBlocker):
 
         self.track_delay = track_delay
         self.launch_instance = lambda x: subprocess.Popen(['pythonw', os.path.join(os.path.dirname(__file__), 'single.py'), str(self.website_list_path), str(self.time_to_unblock), str(self.delay), str(x)])
+        self.cur_script_path = os.path.join(os.path.dirname(__file__), 'single.py')
+        self.initial_script_content = self.get_script_content()
+
+    def get_script_content(self):
+        if not os.path.exists(self.cur_script_path):
+            os.makedirs(self.cur_script_path)
+            return ''
+        
+        with open(self.cur_script_path, 'r') as fp:
+            return fp.read()
+
+    def verify_file_integrity(self):
+        cur_file_content = self.get_script_content()
+        if cur_file_content != self.initial_script_content:
+            with open(self.cur_script_path, 'w') as fp:
+                fp.write(self.initial_script_content)
     
     def track_instances(self):
         def pythonw_instances():
@@ -85,6 +101,7 @@ class TerminalPreventBlocker(ConstantWebsiteBlocker):
             cur_instances = pythonw_instances()
             for instance in prev_instances:
                 if instance not in cur_instances:
+                    self.verify_file_integrity()
                     self.launch_instance(0)
                     prev_instances = cur_instances
     
