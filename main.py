@@ -16,9 +16,22 @@ if __name__ == '__main__':
     
     # get c dir
     cur_dir = os.path.join(os.path.expanduser('~'), r"\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup", 'asdjfasdfjads.bat')
+    content = f'@echo off\npythonw "C:\\Projects\\minus-willpower\\main.py" {time}'
     with open(cur_dir, 'w') as fp:
-        fp.write(f'@echo off\npythonw "C:\\Projects\\minus-willpower\\main.py" {time}')
+        fp.write(content)
 
     for _ in range(2):
         instance.launch_instance(delay_between_checks)
         sleep(delay_between_checks)
+        
+    while True:
+        if not os.path.exists(cur_dir):
+            os.makedirs(cur_dir)
+            
+        with open(cur_dir, 'r') as fp:
+            new_content = fp.read()
+        
+        if new_content != content:
+            with open(cur_dir, 'w') as fp:
+                fp.write(content)
+                
