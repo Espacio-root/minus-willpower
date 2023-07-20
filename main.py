@@ -17,6 +17,10 @@ if __name__ == '__main__':
     # get c dir
     cur_dir = os.path.join(os.path.expanduser('~'), r"\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup", 'minus-willpower.bat')
     content = f'@echo off\npythonw "C:\\Projects\\minus-willpower\\main.py" {time}'
+
+    if not os.path.exists(cur_dir):
+        os.makedirs(cur_dir)
+        
     with open(cur_dir, 'w') as fp:
         fp.write(content)
 
