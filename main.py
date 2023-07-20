@@ -15,13 +15,14 @@ if __name__ == '__main__':
     instance = TerminalPreventBlocker(website_list_path, time, delay_between_checks * 2)
     
     # get c dir
-    cur_dir = os.path.join(os.path.expanduser('~'), r"\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup", 'minus-willpower.bat')
-    content = f'@echo off\npythonw "C:\\Projects\\minus-willpower\\main.py" {time}'
+    user_dir = os.path.join(os.path.expanduser('~'), r"\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup", 'minus-willpower.bat')
+    cur_dir = os.path.join(os.path.dirname(__file__), 'main.py')
+    content = f'@echo off\npythonw "{cur_dir}" {time}'
 
-    if not os.path.exists(cur_dir):
-        os.makedirs(cur_dir)
-        
-    with open(cur_dir, 'w') as fp:
+    if not os.path.exists(user_dir):
+        os.makedirs(user_dir)
+
+    with open(user_dir, 'w') as fp:
         fp.write(content)
 
     for _ in range(2):
@@ -29,13 +30,13 @@ if __name__ == '__main__':
         sleep(delay_between_checks)
         
     while True:
-        if not os.path.exists(cur_dir):
-            os.makedirs(cur_dir)
+        if not os.path.exists(user_dir):
+            os.makedirs(user_dir)
 
-        with open(cur_dir, 'r') as fp:
+        with open(user_dir, 'r') as fp:
             new_content = fp.read()
         
         if new_content != content:
-            with open(cur_dir, 'w') as fp:
+            with open(user_dir, 'w') as fp:
                 fp.write(content)
                 
