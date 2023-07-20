@@ -111,49 +111,6 @@ class Helper:
             cur_time = eval(cur_time)
         
         return float(cur_time) + time()
-    
-            
-# class MultipleInstances:
-#     def __init__(self, num_processes, website_list_path, time_to_unblock, delay_between_checks):
-        
-#         self.num_processes = num_processes
-#         self.check_delay = delay_between_checks * num_processes
-#         self.website_list_path = website_list_path
-#         self.delay = delay_between_checks
-#         self.time_to_unblock = time_to_unblock
-
-        
-#     @staticmethod
-#     def launch_pythonw(command, *args):
-#         args = [str(arg) for arg in args]
-#         args = ' '.join(args)
-#         subprocess.Popen(['pythonw', command, args])
-
-#     def launch_instances(self, num):
-#         for _ in range(num):
-#             file_path = os.path.join(os.path.dirname(__file__), 'single.py')
-#             MultipleInstances.launch_pythonw(file_path, self.website_list_path, self.time_to_unblock, self.delay)
-#             sleep(self.delay)
-            
-            
-#     def track_instances(self):
-#         def count_pythonw_instances(name):
-#             count = 0
-#             for proc in psutil.process_iter(['name']):
-#                 if proc.info['name'] == name:  # type: ignore
-#                     count += 1
-#             return count
-#         initial_num_instances = count_pythonw_instances('pythonw.exe')
-
-#         while time() <= self.time_to_unblock:
-#             num_instances = count_pythonw_instances('pythonw.exe')
-#             if num_instances < initial_num_instances:
-#                 self.launch_pythonw(os.path.join(os.path.dirname(__file__), 'multiple.py'), self.time_to_unblock)
-#                 break
-                
-#     def block_websites(self):
-#         self.launch_instances(self.num_processes)
-#         self.track_instances()
             
 if __name__ == '__main__':
     
