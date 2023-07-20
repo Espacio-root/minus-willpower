@@ -33,4 +33,13 @@ web.whatsapp.com
 youtube.com
 m.youtube.com
 www.youtube.com
-y2mate.com
+instagram.com
+www.instagram.com
+m.instagram.com
+www.instagr.am
+www.instagram.com/{username}
+
+# Miscellaneous
+zty.pe
+monkeytype.com
+10fastfingers.com

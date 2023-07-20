@@ -63,10 +63,11 @@ class ConstantWebsiteBlocker(WebsiteBlocker):
             sleep(self.delay)
             
 class TerminalPreventBlocker(ConstantWebsiteBlocker):
-    def __init__(self, website_list_path, time_to_unblock, delay_between_checks):
+    def __init__(self, website_list_path, time_to_unblock, delay_between_checks, track_delay=0):
         super().__init__(website_list_path, time_to_unblock, delay_between_checks)
 
-        self.launch_instance = lambda: subprocess.Popen(['pythonw', os.path.join(os.path.dirname(__file__), 'single.py'), str(self.website_list_path), str(self.time_to_unblock), str(self.delay)])
+        self.track_delay = track_delay
+        self.launch_instance = lambda x: subprocess.Popen(['pythonw', os.path.join(os.path.dirname(__file__), 'single.py'), str(self.website_list_path), str(self.time_to_unblock), str(self.delay), str(x)])
     
     def track_instances(self):
         def pythonw_instances():
@@ -75,13 +76,18 @@ class TerminalPreventBlocker(ConstantWebsiteBlocker):
                 if proc.info['name'] == 'pythonw.exe':  # type: ignore
                     instances.append(proc.info['pid']) # type: ignore
             return instances
+        
+        initial_time = time()
+        while time() - initial_time <= self.track_delay * 2:
+            continue
         prev_instances = pythonw_instances()
         
         while time() <= self.time_to_unblock:
             cur_instances = pythonw_instances()
-            if len(cur_instances) < len(prev_instances):
-                self.launch_instance()
-            prev_instances = cur_instances
+            for instance in prev_instances:
+                if instance not in cur_instances:
+                    self.launch_instance(0)
+                    prev_instances = cur_instances
     
     def block_websites(self):
         tracker = Thread(target=self.track_instances)
@@ -154,6 +160,6 @@ if __name__ == '__main__':
     args = sys.argv[1:]
 
     # website_list_path, time_to_unblock, delay_between_checks
-    blocker = TerminalPreventBlocker(args[0], args[1], args[2])
+    blocker = TerminalPreventBlocker(args[0], args[1], args[2], int(args[3]))
     blocker.block_websites()
             
