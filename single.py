@@ -1,6 +1,5 @@
 import platform
 from time import time, sleep
-import re
 import sys
 import os
 import subprocess
