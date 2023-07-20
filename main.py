@@ -8,7 +8,7 @@ if __name__ == '__main__':
 
     max_time_period = 24 * 60 * 60
 
-    website_list_path = 'website_list.txt'
+    website_list_path = 'website.txt'
     delay_between_checks = 2
     arg = sys.argv[1]
     time = min(Helper.handle_time(arg), Helper.handle_time(arg))
