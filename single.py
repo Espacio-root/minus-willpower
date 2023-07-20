@@ -96,7 +96,7 @@ class TerminalPreventBlocker(ConstantWebsiteBlocker):
 class Helper:
     
     @staticmethod
-    def handle_time(cur_time: str or int or float) -> float:
+    def handle_time(cur_time: str | int | float) -> float:
         if isinstance(cur_time, str):
             if ':' not in cur_time:
                 return float(cur_time)
