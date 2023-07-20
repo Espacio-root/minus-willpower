@@ -33,3 +33,4 @@ web.whatsapp.com
 youtube.com
 m.youtube.com
 www.youtube.com
+y2mate.com

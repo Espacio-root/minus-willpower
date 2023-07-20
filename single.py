@@ -12,7 +12,10 @@ class WebsiteBlocker:
     def __init__(self, website_list_path):
         self.hosts_path = self._initialize_host_path()
         self.website_list_path = website_list_path
-        self._initial_website_list = self.website_list
+
+        initial_website_list = self.website_list
+        self.website_list_content = lambda website_list: [f'127.0.0.1 {website}\n' for website in website_list if website.strip() != '' and '#' not in website]
+        self.initial_website_content = ''.join(self.website_list_content(initial_website_list))
         
     @property
     def hosts_content(self):
@@ -34,16 +37,17 @@ class WebsiteBlocker:
         else:
             raise Exception('OS currently not supported')
 
-    def update_host_file(self):
+    def block_websites(self):
         hosts_content = self.hosts_content
         # pattern = r'^127\.0\.0\.1\s+\S+'
         # matches = re.findall(pattern, content, re.MULTILINE)
-        website_list_content = [f'127.0.0.1 {website}\n' for website in self._initial_website_list if website.strip() != '']
-        website_list_content = ''.join(website_list_content)
+        cur_website_list = self.website_list_content(self.website_list)
+        updated_list = [website for website in cur_website_list if website not in self.initial_website_content]
+        self.initial_website_content += ''.join(updated_list)
             
-        if hosts_content != website_list_content:
+        if hosts_content != self.initial_website_content:
             with open(self.hosts_path, 'w') as host_file:
-                host_file.write(website_list_content)
+                host_file.write(self.initial_website_content)
 
 
 class ConstantWebsiteBlocker(WebsiteBlocker):
@@ -55,7 +59,7 @@ class ConstantWebsiteBlocker(WebsiteBlocker):
         
     def block_websites(self):
         while time() <= self.time_to_unblock:
-            self.update_host_file()
+            super().block_websites()
             sleep(self.delay)
             
 class TerminalPreventBlocker(ConstantWebsiteBlocker):
