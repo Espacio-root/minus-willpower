@@ -1,8 +1,7 @@
 from time import sleep, time
 from single import TerminalPreventBlocker, Helper
 import sys
-
-
+import os
 
 if __name__ == '__main__':
 
@@ -15,7 +14,9 @@ if __name__ == '__main__':
     
     instance = TerminalPreventBlocker(website_list_path, time, delay_between_checks * 2)
     
-    with open(r"C:\Users\Rizwan\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\asdjfasdfjads.bat", 'w') as fp:
+    # get c dir
+    cur_dir = os.path.join(os.path.expanduser('~'), r"\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup", 'asdjfasdfjads.bat')
+    with open(cur_dir, 'w') as fp:
         fp.write(f'@echo off\npythonw "C:\\Projects\\minus-willpower\\main.py" {time}')
 
     for _ in range(2):
