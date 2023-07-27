@@ -2,15 +2,19 @@ import platform
 from time import time, sleep
 import sys
 import os
-import stat
 import subprocess
 import psutil
 from threading import Thread
+from datetime import datetime, timedelta
 
 
 class WebsiteBlocker:
 
     def __init__(self, website_list_path):
+        
+        user_path = os.path.expanduser('~')
+        self.python_cmd = 'pythonw'
+        self.python_executable = os.path.join(user_path, 'AppData', 'Local', 'Programs', 'Python', 'Python311', f'{self.python_cmd}.exe')
         self.hosts_path = self._initialize_host_path()
         self.website_list_path = website_list_path
 
@@ -72,7 +76,7 @@ class TerminalPreventBlocker(ConstantWebsiteBlocker):
         super().__init__(website_list_path, time_to_unblock, delay_between_checks)
 
         self.track_delay = track_delay
-        self.launch_instance = lambda x: subprocess.Popen(['python', os.path.join(os.path.dirname(
+        self.launch_instance = lambda x: subprocess.Popen([self.python_cmd, os.path.join(os.path.dirname(
             __file__), 'single.py'), str(self.website_list_path), str(self.time_to_unblock), str(self.delay), str(x)])
         self.cur_script_path = os.path.join(
             os.path.dirname(__file__), 'single.py')
@@ -92,46 +96,105 @@ class TerminalPreventBlocker(ConstantWebsiteBlocker):
             with open(self.cur_script_path, 'w') as fp:
                 fp.write(self.initial_script_content)
 
+
     def track_instances(self):
-        def pythonw_instances():
+        def get_instances(name):
             instances = []
             for proc in psutil.process_iter(['name', 'pid']):
-                if proc.info['name'] == 'python.exe':  # type: ignore
+                if proc.info['name'] == name:  # type: ignore
                     instances.append(proc.info['pid'])  # type: ignore
             return instances
+
+        def verify_task_manger():
+            instances = get_instances('Taskmgr.exe')
+            if len(instances) > 0:
+                for pid in instances:
+                    try:
+                        os.kill(pid, 9)
+                    except:
+                        pass
 
         initial_time = time()
         while time() - initial_time <= self.track_delay * 2:
             continue
-        prev_instances = pythonw_instances()
+        prev_instances = get_instances(f'{self.python_cmd}.exe')
 
         while time() <= self.time_to_unblock:
-            cur_instances = pythonw_instances()
+            cur_instances = get_instances(f'{self.python_cmd}.exe')
+            verify_task_manger()
+            
             for instance in prev_instances:
                 if instance not in cur_instances:
                     self.verify_script_integrity()
                     self.launch_instance(0)
                     prev_instances = cur_instances
-            self.verify_bat_integrity()
-
-    def verify_bat_integrity(self):
-        user_dir = fr'{os.path.expanduser("~")}\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\minus-willpower.bat'
-        cur_file = os.path.abspath(__file__)
-        content = f'pythonw "{cur_file}" {self.time_to_unblock}'
-
-        if not os.path.exists(user_dir):
-            os.makedirs(user_dir)
-
-        with open(user_dir, 'r') as fp:
-            cur_content = fp.read()
-
-        if cur_content != content:
-            with open(user_dir, 'w') as fp:
-                fp.write(content)
 
     def block_websites(self):
         tracker = Thread(target=self.track_instances)
         tracker.start()
+        super().block_websites()
+        
+class RestartPreventBlocker(TerminalPreventBlocker):
+    
+    def __init__(self, website_list_path, time_to_unblock, delay_between_checks, track_delay=0):
+        super().__init__(website_list_path, time_to_unblock, delay_between_checks, track_delay)
+
+        self.task_name = "MinusWillpower"
+     
+    def create_task(self):
+        script_path = os.path.join(os.path.dirname(__file__), "main.py")
+        
+        task_command = [
+            "schtasks",
+            "/create",
+            "/tn",
+            self.task_name,
+            "/tr",
+            f"{self.python_executable} \"{script_path}\" \"{self.time_to_unblock}\"",
+            "/sc",
+            "ONLOGON", # Run on logon
+            "/RU",
+            "EVERYONE", # Run as the current user
+            "/RL",
+            "HIGHEST",  # Run with highest privileges
+        ]
+
+        try:
+            subprocess.run(task_command, check=True, shell=True)
+        except subprocess.CalledProcessError:
+            pass
+    
+    def delete_task(self, task_name):
+        try:
+            task_delete = f"schtasks /delete /tn {task_name} /f"
+            subprocess.run(task_delete, check=True)
+        except subprocess.CalledProcessError:
+            pass
+            
+    def is_task_running(self, task_name):
+        try:
+            task_query = f"schtasks /query /tn {task_name}"
+            task_output = subprocess.run(task_query, check=True, capture_output=True, text=True, stderr=subprocess.PIPE)
+            return "Ready" in task_output.stdout
+        except subprocess.CalledProcessError:
+            return False
+
+    def track_scheduler(self):
+        initial_time = time()
+        while time() - initial_time <= self.track_delay * 2:
+            continue
+        
+        if self.is_task_running(self.task_name):
+            self.delete_task(self.task_name)
+        while time() <= float(self.time_to_unblock):
+            cur_task = self.is_task_running(self.task_name)
+            if cur_task == False:
+                self.create_task()
+                
+    def block_websites(self):
+        scheduler_thread = Thread(target=self.track_scheduler)
+        scheduler_thread.start()
+        
         super().block_websites()
         
 class Helper:
@@ -158,5 +221,5 @@ if __name__ == '__main__':
     args = sys.argv[1:]
 
     # website_list_path, time_to_unblock, delay_between_checks
-    blocker = TerminalPreventBlocker(args[0], args[1], args[2], int(args[3]))
+    blocker = RestartPreventBlocker(args[0], args[1], args[2], int(args[3]))
     blocker.block_websites()
